@@ -28,9 +28,32 @@ res.distance <- rep(35, 8)
 res.energy <- res.defaultenergy[res.level]
 
 # BURSTERS
-bursters.levels = c(7,6,5)
-bursters.x = c(-40, -20,  0)
-bursters.y = c(-5,   -5, -5)
+# 7,6,5 travelling west-to-east
+#bursters.levels = c(7,6,5)
+#bursters.x = c(-40, -20,  0)
+#bursters.y = c(-5,   -5, -5)
+
+# 8s in the center (the last param in rep is the number of bursters, e.g. 5)
+#bursters.levels = rep(8, 5)
+#bursters.x = rep(0, 5)
+#bursters.y = rep(0, 5)
+
+# burster placement that matches the lazy loading res arrangement (i.e. an 8 burster at 35m E, 7 at 35m NE, etc)
+#bursters.levels = c(8,7,6,6,5,5,4,4)
+#bursters.x = c(35, 25, 0,  -25, -35, -25, 0,   25)
+#bursters.y = c(0,  25, 35, 25,  0,   -25, -35, -25)
+
+# 3x8s over the eastern side
+bursters.levels = c(8,8,8)
+bursters.x = c(30, 25, 20)
+bursters.y = c(5,  10,  5)
+
+# no bursters, just show the resonators
+#bursters.levels = c()
+#bursters.x = c()
+#bursters.y = c()
+
+
 bursters.col = res.colors[bursters.levels]
 
 # functions
@@ -72,36 +95,38 @@ damage_func = graphracer
 # matrix & picture of burster damage
 # 800x800 matrix for -40.0 to +40.0 w/0.1 increment steps
 dmg_matrix <- matrix(0, 800, 800)
-for (i in 1:length(bursters.levels)) {
-  for (x in -400:400) {
-    for (y in -400:400) {
-      dx = x / 10
-      dy = y / 10
-      dmg_matrix[x+400,y+400] = dmg_matrix[x+400,y+400] + 
-        damage_func(dx,dy, bursters.levels[i], bursters.x[i],bursters.y[i])
-    }
-  }
-}
-image(dmg_matrix, frame.plot=F, axes=F)
-par(new=T) # persist previous image & draw over it
-
-# calculate damage on the actual resonators
-total_dmg = 0
 res.symbols = rep(21, 8)
 res.energypct = rep(1, 8)
-for (i in 1:8) {
-  x = res.getx(res.distance[i], i)
-  y = res.gety(res.distance[i], i)
-  # pull damage from the matrix, capping out at the resonator's energy level
-  dmg = min(dmg_matrix[round(x*10)+400,round(y*10)+400], res.energy[i])
-  # update resonator energy level
-  new_energy = res.energy[i] - dmg
-  res.energypct[i] = paste(round((new_energy / res.energy[i]) * 100), "%", sep="")
-  res.energy[i] = new_energy
-  if (res.energy[i] == 0)
-    res.symbols[i] = 4
-  
-  total_dmg = total_dmg + dmg
+total_dmg = 0
+if (length(bursters.levels > 0)) {
+  for (i in 1:length(bursters.levels)) {
+    for (x in -400:400) {
+      for (y in -400:400) {
+        dx = x / 10
+        dy = y / 10
+        dmg_matrix[x+400,y+400] = dmg_matrix[x+400,y+400] + 
+          damage_func(dx,dy, bursters.levels[i], bursters.x[i],bursters.y[i])
+      }
+    }
+  }
+  image(dmg_matrix, frame.plot=F, axes=F)
+  par(new=T) # persist previous image & draw over it
+
+  # calculate damage on the actual resonators
+  for (i in 1:8) {
+    x = res.getx(res.distance[i], i)
+    y = res.gety(res.distance[i], i)
+    # pull damage from the matrix, capping out at the resonator's energy level
+    dmg = min(dmg_matrix[round(x*10)+400,round(y*10)+400], res.energy[i])
+    # update resonator energy level
+    new_energy = res.energy[i] - dmg
+    res.energypct[i] = paste(round((new_energy / res.energy[i]) * 100), "%", sep="")
+    res.energy[i] = new_energy
+    if (res.energy[i] == 0)
+      res.symbols[i] = 4
+    
+    total_dmg = total_dmg + dmg
+  }
 }
 
 # plot the resonators
@@ -114,9 +139,11 @@ plot(diag(sapply(res.distance, res.getx, 1:8)), diag(sapply(res.distance, res.ge
      ylim=c(-40, 40), xlim=c(-40,40), xlab="", ylab="", xaxs="i", yaxs="i",
      bg=res.colors[res.level], pch=res.symbols, cex=4, col="#ffffff")
 
-# plot res %
-text(diag(sapply(res.distance, res.getx, 1:8)), diag(sapply(res.distance, res.gety, 1:8)),
-     res.energypct, cex=0.5)
-
 # plot the bursters
 points(bursters.x, bursters.y, pch=23, cex=2, col=bursters.col, bg=0)
+
+# plot res %
+if (length(bursters.levels) > 0) {
+  text(diag(sapply(res.distance, res.getx, 1:8)), diag(sapply(res.distance, res.gety, 1:8)),
+       res.energypct, cex=0.5)
+}
