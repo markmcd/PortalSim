@@ -7,7 +7,7 @@ res.colors = c("#fece5a", "#ffa630", "#ff7315", "#e40000", "#fd2992", "#eb26cd",
 # input data
 
 # ALL L1, 35m distance
-# level, 1-8
+# level, 1-8, use NA for missing res
 #res.level <- rep(1, 8)
 # distance from portal center, in m, 1-40
 #res.distance <- rep(35, 8)
@@ -43,10 +43,11 @@ res.energy <- res.defaultenergy[res.level]
 #bursters.x = c(35, 25, 0,  -25, -35, -25, 0,   25)
 #bursters.y = c(0,  25, 35, 25,  0,   -25, -35, -25)
 
-# 3x8s over the eastern side
-bursters.levels = c(8,8,8)
-bursters.x = c(30, 25, 20)
-bursters.y = c(5,  10,  5)
+# 4x8s over the eastern side (looks kinda nice, good for demoing ;)
+# this seems to be a decent strategy against lazy loading
+bursters.levels = c(8,8,8,8)
+bursters.x = c(15, 20, 25, 20)
+bursters.y = c(15, 20, 15, 10)
 
 # no bursters, just show the resonators
 #bursters.levels = c()
@@ -56,7 +57,7 @@ bursters.y = c(5,  10,  5)
 
 bursters.col = res.colors[bursters.levels]
 
-# functions
+# polar -> cartesian conversion functions
 res.getx = function (distance, index) {
   # angle is in radians, index 0 = EAST, rotating CCW
   angle = (index - 1) * pi / 4
@@ -96,7 +97,7 @@ damage_func = graphracer
 # 800x800 matrix for -40.0 to +40.0 w/0.1 increment steps
 dmg_matrix <- matrix(0, 800, 800)
 res.symbols = rep(21, 8)
-res.energypct = rep(1, 8)
+res.energypct = rep("100%", 8)
 total_dmg = 0
 if (length(bursters.levels > 0)) {
   for (i in 1:length(bursters.levels)) {
@@ -112,20 +113,22 @@ if (length(bursters.levels > 0)) {
   image(dmg_matrix, frame.plot=F, axes=F)
   par(new=T) # persist previous image & draw over it
 
-  # calculate damage on the actual resonators
+  # calculate damage on the resonators
   for (i in 1:8) {
-    x = res.getx(res.distance[i], i)
-    y = res.gety(res.distance[i], i)
-    # pull damage from the matrix, capping out at the resonator's energy level
-    dmg = min(dmg_matrix[round(x*10)+400,round(y*10)+400], res.energy[i])
-    # update resonator energy level
-    new_energy = res.energy[i] - dmg
-    res.energypct[i] = paste(round((new_energy / res.energy[i]) * 100), "%", sep="")
-    res.energy[i] = new_energy
-    if (res.energy[i] == 0)
-      res.symbols[i] = 4
-    
-    total_dmg = total_dmg + dmg
+    if (!is.na(res.level[i])) {
+      x = res.getx(res.distance[i], i)
+      y = res.gety(res.distance[i], i)
+      # pull damage from the matrix, capping out at the resonator's energy level
+      dmg = min(dmg_matrix[round(x*10)+400,round(y*10)+400], res.energy[i])
+      # update resonator energy level
+      new_energy = res.energy[i] - dmg
+      res.energypct[i] = paste(round((new_energy / res.energy[i]) * 100), "%", sep="")
+      res.energy[i] = new_energy
+      if (res.energy[i] == 0)
+        res.symbols[i] = 4
+      
+      total_dmg = total_dmg + dmg
+    }
   }
 }
 
