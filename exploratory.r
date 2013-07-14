@@ -43,11 +43,17 @@ res.energy <- res.defaultenergy[res.level]
 #bursters.x = c(35, 25, 0,  -25, -35, -25, 0,   25)
 #bursters.y = c(0,  25, 35, 25,  0,   -25, -35, -25)
 
-# 4x8s over the eastern side (looks kinda nice, good for demoing ;)
+# 3x8s over the eastern side (looks kinda nice, good for demoing ;)
+bursters.levels = c(8,8,8)
+bursters.x = c(15, 20, 25)
+bursters.y = c(15, 20, 15)
+
+
+# 4x8s over the eastern side
 # this seems to be a decent strategy against lazy loading
-bursters.levels = c(8,8,8,8)
-bursters.x = c(15, 20, 25, 20)
-bursters.y = c(15, 20, 15, 10)
+#bursters.levels = c(8,8,8,8)
+#bursters.x = c(15, 20, 25, 20)
+#bursters.y = c(15, 20, 15, 10)
 
 # no bursters, just show the resonators
 #bursters.levels = c()
