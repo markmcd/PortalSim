@@ -9,6 +9,8 @@ https://github.com/Xosofox/IPAS/
 
 I built this to eventually run simulations to determine the best offense / defense strategies for different situations.  Right now it's a visualisation tool and not much else, though it does look nice :)
 
+Since this is a highly theoretical application, it has no consideration for shields or links when it comes to damage & mitigation.  These defenses provide even protection across all resonators so shouldn't be necessary when optimising resonator / burster locations.  The numbers will be different but the strategies should apply successfully when mods are in use.
+
 Usage
 -----
 The 'exploratory.r' file is written such that it can be executed all-at-once, even though it's exploratory.  To use it, open it up in your favourite R environment and tweak the options in the top half of the file.
@@ -35,4 +37,4 @@ The burster damage heatmap can take 20-30s to load so hang in there.  The more b
 Pics
 ----
 Lazily loaded resonators attacked with 3xL8 bursters fired from a sensible location.
-![Lazy loading attack](lazyload.png)
+![Lazy loading attack](pics/lazyload.png)

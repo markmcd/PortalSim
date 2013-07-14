@@ -33,10 +33,10 @@ res.energy <- res.defaultenergy[res.level]
 #bursters.x = c(-40, -20,  0)
 #bursters.y = c(-5,   -5, -5)
 
-# 8s in the center (the last param in rep is the number of bursters, e.g. 5)
-#bursters.levels = rep(8, 5)
-#bursters.x = rep(0, 5)
-#bursters.y = rep(0, 5)
+# 8s in the center (the last param in rep is the number of bursters, e.g. 3)
+#bursters.levels = rep(8, 3)
+#bursters.x = rep(0, 3)
+#bursters.y = rep(0, 3)
 
 # burster placement that matches the lazy loading res arrangement (i.e. an 8 burster at 35m E, 7 at 35m NE, etc)
 #bursters.levels = c(8,7,6,6,5,5,4,4)
@@ -155,4 +155,6 @@ points(bursters.x, bursters.y, pch=23, cex=2, col=bursters.col, bg=0)
 if (length(bursters.levels) > 0) {
   text(diag(sapply(res.distance, res.getx, 1:8)), diag(sapply(res.distance, res.gety, 1:8)),
        res.energypct, cex=0.5)
+  title(main=paste("Damage:", total_dmg, "/", (total_dmg+sum(res.energy))))
 }
+
