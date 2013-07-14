@@ -36,5 +36,9 @@ The burster damage heatmap can take 20-30s to load so hang in there.  The more b
 
 Pics
 ----
+If you have any cool pics you've made, I'd love to see them.  Email me i@ii.net.
+
 Lazily loaded resonators attacked with 3xL8 bursters fired from a sensible location.
 ![Lazy loading attack](pics/lazyload.png)
+
+
