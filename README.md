@@ -41,4 +41,8 @@ If you have any cool pics you've made, I'd love to see them.  Email me i@ii.net.
 Lazily loaded resonators attacked with 3xL8 bursters fired from a sensible location.
 ![Lazy loading attack](pics/lazyload.png)
 
+Lazy fill getting a street drive-by on the south side.
+![Lazy loading drive-by](pics/lazyloading_3xL8_driveby.png)
 
+Attempting to optimise street-side placement to minimise drive-bys (unsuccessfully)
+![Street-side protection](pics/streetlayout_3xL8_driveby.png)
