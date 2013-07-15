@@ -7,10 +7,10 @@ res.colors = c("#fece5a", "#ffa630", "#ff7315", "#e40000", "#fd2992", "#eb26cd",
 map.radius = 50
 # how fine the detail is on the heatmap (1 = 1m, 0.1 = 10cm)
 map.resolution = 0.1
-# show the heatmap background?  this is the slowest part of the process
+# show the heatmap background?  this is the slowest part of the rendering process
 map.showheatmap = T
 
-# input data
+# input data (resonators, bursters, etc)
 
 # ALL L1, 35m distance
 # level, 1-8, use NA for missing res
@@ -31,6 +31,7 @@ res.distance <- rep(35, 8)
 #res.distance <- c(35, 35, 35, 35, 35, 5, 1, 5)
 
 # remaining energy (initialise to 100%)
+#you probaby don't want to touch this unless initialising a previously attacked portal
 res.energy <- res.defaultenergy[res.level]
 
 # BURSTERS
@@ -50,9 +51,9 @@ res.energy <- res.defaultenergy[res.level]
 #bursters.y = c(0,  25, 35, 25,  0,   -25, -35, -25)
 
 # 3x8s over the eastern side (looks kinda nice, good for demoing ;)
-bursters.levels = c(8,8,8)
-bursters.x = c(15, 20, 25)
-bursters.y = c(15, 20, 15)
+#bursters.levels = c(8,8,8)
+#bursters.x = c(15, 20, 25)
+#bursters.y = c(15, 20, 15)
 
 
 # 4x8s over the eastern side
@@ -60,6 +61,11 @@ bursters.y = c(15, 20, 15)
 #bursters.levels = c(8,8,8,8)
 #bursters.x = c(15, 20, 25, 20)
 #bursters.y = c(15, 20, 15, 10)
+
+# drive-by, travelling west-to-east (3xL8)
+bursters.levels = c(8,8,8)
+bursters.x = c(-20, 0, 20)
+bursters.y = c(-20, -20, -20)
 
 # no bursters, just show the resonators
 #bursters.levels = c()
