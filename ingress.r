@@ -66,7 +66,6 @@ portal <- function(resonators = list(), distances = c()) {
   else
     dist = c(distances, rep(NA, 8-length(distances)))
   
-  
   p = list(resonators = res, distances = dist)
   
   class(p) = "portal"
@@ -74,22 +73,90 @@ portal <- function(resonators = list(), distances = c()) {
 }
 
 portal.level <- function(portal) {
-  floor(sum(sapply(portal$resonators, '[[', 'level')) / 8)
+  floor(sum(sapply(p$resonators, function(x){if(is.na(x[1])) 0 else x$level})) / 8)
 }
 
 print.portal <- function(p, ...) {
   i = 1
   for (x in list(p, ...)) {
-    res = data.frame(level = sapply(p$resonators, '[[', 'level'),
-                     energy = sapply(p$resonators, '[[', 'energy'),
+    # level = sapply(p$resonators, '[[', 'level') does not work with NAs :/
+    res = data.frame(level = sapply(p$resonators, function(x){if(is.na(x[1])) NA else x$level}),
+                     energy = sapply(p$resonators, function(x){if(is.na(x[1])) NA else x$energy}),
                      distance = p$distances)
     row.names(res) = portal.slots
     cat(paste0("[",i,"]\n"))
     cat(paste0("Level ",portal.level(x)," portal\n\nResonators:\n"))
     print(res)
     cat("\n")
-    cat(paste0("Total energy: ",sum(sapply(p$resonators, '[[', 'energy')),"\n"))
+    cat(paste0("Total energy: ",sum(sapply(p$resonators, function(x){if(is.na(x[1])) 0 else x$energy})),"\n"))
     cat("\n")
+    i = i + 1
+  }
+}
+
+### SCHEMATA
+
+## BURSTER SCHEMA
+
+# this is an additive function.  add more bursters by passing the schema to this constructor.
+burster.schema <- function (burster, x, y, schema = NA) {
+  bpos = list(burster = burster, x = x, y = y)
+  
+  if (is.na(schema))
+    newschema = list(bpos)
+  else
+    newschema = append(schema, list(bpos))
+  
+  class(newschema) = "burster.schema"
+  newschema
+}
+
+print.burster.schema <- function(bs, ...) {
+  i = 1
+  for (x in list(bs, ...)) {
+    if (length(list(bs, ...)) > 1)
+      cat(paste0("[",i,"]\n"))
+    
+    j = 1
+    for (bp in bs) {
+      cat(paste0("[",j,"] L",bp$burster$level," burster at (",bp$x,", ",bp$y,")\n"))
+      j = j + 1
+    }
+    
+    if (length(list(bs, ...)) > 1)
+      cat("\n")
+    i = i + 1
+  }
+}
+
+## PORTAL SCHEMA
+
+portal.schema <- function (portal, x, y, schema = NA) {
+  ppos = list(portal = portal, x = x, y = y)
+  
+  if (is.na(schema))
+    newschema = list(ppos)
+  else
+    newschema = append(schema, list(ppos))
+  
+  class(newschema) = "portal.schema"
+  newschema
+}
+
+print.portal.schema <- function(ps, ...) {
+  i = 1
+  for (x in list(ps, ...)) {
+    if (length(list(ps, ...)) > 1)
+      cat(paste0("[",i,"]\n"))
+    
+    j = 1
+    for (p in ps) {
+      cat(paste0("[",j,"] L",portal.level(p)," portal at (",p$x,", ",p$y,")\n"))
+      j = j + 1
+    }
+    
+    if (length(list(ps, ...)) > 1)
+      cat("\n")
     i = i + 1
   }
 }
