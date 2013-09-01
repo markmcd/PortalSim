@@ -1,6 +1,44 @@
+### Sample code
+
+ingress.demo.code <- function() {
+  # a burster
+  b5 = burster(5)
+  print(b5)
+  
+  # an L5 resonator at full energy
+  r5 = resonator(5)
+  print(r5)
+  
+  # an L6 resonator at 75%
+  r6 = resonator(6, 3000)
+  print(r6)
+  
+  # a L8 portal portal(resonators, distances)
+  p8 = portal(
+    list(resonator(8), resonator(8), resonator(8), resonator(8), resonator(8), resonator(8), resonator(8), resonator(8)), 
+    rep(35, 8))
+  print(p8)
+  
+  # the plot() command works too!
+  # though you might prefer a square aspect ratio:
+  par(pty="s")
+  plot(p8)
+  
+  # an arrangement of portals is called a schema. add a portal at it's x,y position
+  portalmap = portal.schema(p8, 0, 0)
+  print(portalmap)
+  
+  # add another portal to a schema like so
+  p7 = portal(list(resonator(7), resonator(7), resonator(7), resonator(7), resonator(7), resonator(7), resonator(7), resonator(7)), rep(35, 8))
+  portalmap = portal.schema(p7, 90, 0, portalmap)
+  print(portalmap)
+  
+}
+
 ### RESONATORS
 
 resonator.default_energy = c(1000, 1500, 2000, 2500, 3000, 4000, 5000, 6000)
+resonator.default_colour = c("#fece5a", "#ffa630", "#ff7315", "#e40000", "#fd2992", "#eb26cd", "#c124e0", "#9627f4")
 
 resonator <- function (level, energy = NA) {
   r = list(level = level, energy = energy)
@@ -13,14 +51,23 @@ resonator <- function (level, energy = NA) {
 }
 
 print.resonator <- function(r, ...) {
-  i = 1
-  for (x in list(r, ...)) {
-    maxenergy = resonator.default_energy[x$level]
-    pct = round(100 * x$energy / maxenergy)
-    cat(paste0("[",i, "] L",x$level," Resonator at ",x$energy,"/",maxenergy," (",pct,"%)", "\n"))
-    i = i + 1
-  }
+  maxenergy = resonator.default_energy[r$level]
+  pct = round(100 * r$energy / maxenergy)
+  cat(paste0("L",r$level," Resonator at ",r$energy,"/",maxenergy," (",pct,"%)", "\n"))
 }
+
+# polar -> cartesian conversion functions
+resonator.getx = function (distance, index, px = 0) {
+  # angle is in radians, index 0 = EAST, rotating CCW
+  angle = (index - 1) * pi / 4
+  cos(angle) * distance + px
+}
+resonator.gety = function (distance, index, py = 0) {
+  # angle is in radians, index 0 = EAST, rotating CCW
+  angle = (index - 1) * pi / 4
+  sin(angle) * distance + py
+}
+
 
 ### BURSTERS
 
@@ -32,11 +79,7 @@ burster <- function (level) {
 }
 
 print.burster <- function (b, ...) {
-  i = 1
-  for (x in list(b, ...)) {
-    cat(paste0("[",i, "] L",x$level," Burster"), "\n")
-    i = i + 1
-  }
+  cat(paste0("L",b$level," Burster"), "\n")
 }
 
 
@@ -45,7 +88,7 @@ print.burster <- function (b, ...) {
 # resonators are defined CCW starting at EAST
 portal.slots = c("E", "NE", "N", "NW", "W", "SW", "S", "SE")
 
-# having resonators implementes as lists is a bit of a PITA: TODO
+# having resonators implemented as lists is a bit of a PITA: TODO investigate alternatives
 portal <- function(resonators = list(), distances = c()) {
   if (class(resonators) != "list")
     resonators = as.list(resonators)
@@ -73,25 +116,25 @@ portal <- function(resonators = list(), distances = c()) {
 }
 
 portal.level <- function(portal) {
-  floor(sum(sapply(p$resonators, function(x){if(is.na(x[1])) 0 else x$level})) / 8)
+  max(1, floor(sum(sapply(portal$resonators, function(x){if(is.na(x[1])) 0 else x$level})) / 8))
 }
 
 print.portal <- function(p, ...) {
-  i = 1
-  for (x in list(p, ...)) {
-    # level = sapply(p$resonators, '[[', 'level') does not work with NAs :/
-    res = data.frame(level = sapply(p$resonators, function(x){if(is.na(x[1])) NA else x$level}),
-                     energy = sapply(p$resonators, function(x){if(is.na(x[1])) NA else x$energy}),
-                     distance = p$distances)
-    row.names(res) = portal.slots
-    cat(paste0("[",i,"]\n"))
-    cat(paste0("Level ",portal.level(x)," portal\n\nResonators:\n"))
-    print(res)
-    cat("\n")
-    cat(paste0("Total energy: ",sum(sapply(p$resonators, function(x){if(is.na(x[1])) 0 else x$energy})),"\n"))
-    cat("\n")
-    i = i + 1
-  }
+  # level = sapply(p$resonators, '[[', 'level') does not work with NAs :/
+  res = data.frame(level = sapply(p$resonators, function(x){if(is.na(x[1])) NA else x$level}),
+                   energy = sapply(p$resonators, function(x){if(is.na(x[1])) NA else x$energy}),
+                   distance = p$distances)
+  row.names(res) = portal.slots
+  cat(paste0("Level ",portal.level(p)," portal\n\nResonators:\n"))
+  print(res)
+  cat("\n")
+  cat(paste0("Total energy: ",sum(sapply(p$resonators, function(x){if(is.na(x[1])) 0 else x$energy})),"\n"))
+  cat("\n")
+}
+
+plot.portal <- function(p, map.radius=50, ...) {
+  ps = portal.schema(p, 0, 0)
+  plot(ps, map.radius = map.radius, ...)
 }
 
 ### SCHEMATA
@@ -112,21 +155,11 @@ burster.schema <- function (burster, x, y, schema = NA) {
 }
 
 print.burster.schema <- function(bs, ...) {
-  i = 1
-  for (x in list(bs, ...)) {
-    if (length(list(bs, ...)) > 1)
-      cat(paste0("[",i,"]\n"))
-    
-    j = 1
+    i = 1
     for (bp in bs) {
-      cat(paste0("[",j,"] L",bp$burster$level," burster at (",bp$x,", ",bp$y,")\n"))
-      j = j + 1
+      cat(paste0("[",i,"] L",bp$burster$level," burster at (",bp$x,", ",bp$y,")\n"))
+      i = i + 1
     }
-    
-    if (length(list(bs, ...)) > 1)
-      cat("\n")
-    i = i + 1
-  }
 }
 
 ## PORTAL SCHEMA
@@ -145,18 +178,43 @@ portal.schema <- function (portal, x, y, schema = NA) {
 
 print.portal.schema <- function(ps, ...) {
   i = 1
-  for (x in list(ps, ...)) {
-    if (length(list(ps, ...)) > 1)
-      cat(paste0("[",i,"]\n"))
-    
-    j = 1
-    for (p in ps) {
-      cat(paste0("[",j,"] L",portal.level(p)," portal at (",p$x,", ",p$y,")\n"))
-      j = j + 1
-    }
-    
-    if (length(list(ps, ...)) > 1)
-      cat("\n")
+  for (p in ps) {
+    cat(paste0("[",i,"] L",portal.level(p$portal)," portal at (",p$x,", ",p$y,")\n"))
     i = i + 1
   }
+}
+
+plot.portal.schema <- function(ps, map.radius=50, ...) {
+  x = y = levels = c()
+  minx = miny = maxx = maxy = 0
+  for (portal in ps) {
+    # define the boundaries of the schema
+    minx = min(portal$x, minx)
+    miny = min(portal$y, miny)
+    maxx = max(portal$x, maxx)
+    maxy = max(portal$y, maxy)
+    
+    # collect the resonator points
+    p = portal$portal
+    x = c(x, diag(sapply(p$distance, resonator.getx, 1:8, portal$x)))
+    y = c(y, diag(sapply(p$distance, resonator.gety, 1:8, portal$y)))
+    levels = c(levels, sapply(p$resonators, function(x){if(is.na(x[1])) NA else x$level}))
+  }  
+  
+  # preserve passed args, but provide defaults
+  plotargs = list(xlab="", ylab="", xaxs="i", yaxs="i", 
+                  bg=resonator.default_colour[levels], pch=21, cex=4, col="#ffffff")
+  userargs = list(...)
+  if(length(userargs) > 0){
+    for(i in 1:length(userargs))
+      plotargs[[names(userargs)[i]]] <- userargs[[i]]
+  }
+  
+  do.call(plot.default, c(list(x=x, y=y, ylim=c(miny - map.radius, maxy + map.radius), xlim=c(minx-map.radius, maxx+map.radius)), plotargs))
+}
+
+### ATTACK MODEL
+
+attack <- function(portals, bursters) {
+  
 }
